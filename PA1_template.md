@@ -1,51 +1,81 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 
 ## Loading and preprocessing the data
-```{r library, message=F}
+
+```r
 #package loads
 library(dplyr)
 library(lattice)
 ```
 
-```{r}
+
+```r
 unzip("activity.zip") ##unzip gives activity.csv in our working directory
 dat <- read.csv("activity.csv",stringsAsFactors=F)
 ```
 
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 #use dplyr to group and summarize by each date value
 step.day <- dat %>% group_by(date) %>% summarize(steps=sum(steps,na.rm=T))
 hist(step.day$steps,breaks=10)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 mean(step.day$steps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(step.day$steps)
+```
+
+```
+## [1] 10395
 ```
 
 ## What is the average daily activity pattern?
 
-```{r}
+
+```r
 step.interval <- dat %>% group_by(interval) %>% summarize(steps=sum(steps,na.rm=T))
 plot(step.interval$interval,step.interval$steps,type="l")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+```r
 #interval with the largest number of steps on average
 arrange(step.interval,desc(steps))[[1,1]]
 ```
 
+```
+## [1] 835
+```
+
 ## Imputing missing values
 
-```{r}
+
+```r
 #provides the number of rows that are not complete which we will be imputing.
 dat.miss <- nrow(dat[!complete.cases(dat),])
 dat.miss
+```
 
+```
+## [1] 2304
+```
+
+```r
 dat.impute <- dat #initialize new var
 
 #calculate the mean step value across all days for each interval. 
@@ -67,18 +97,47 @@ for(i in 1:nrow(dat.impute)){
 #use dplyr to group and summarize by each date value; same as before but for dat.impute. .i for imputed
 step.day.i <- dat.impute %>% group_by(date) %>% summarize(steps=sum(steps,na.rm=T))
 hist(step.day.i$steps,breaks=10)
-mean(step.day.i$steps)
-median(step.day.i$steps)
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+```r
+mean(step.day.i$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+median(step.day.i$steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 #These values can be compared to the earlier mean and median duplicated below:
 mean(step.day$steps)
-median(step.day$steps)
+```
 
+```
+## [1] 9354.23
+```
+
+```r
+median(step.day$steps)
+```
+
+```
+## [1] 10395
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 weekendCheck <- function(x){
     temp <- vector()
     for(i in 1:length(x)){
@@ -98,4 +157,6 @@ dat.impute$wknd <- factor(weekendCheck(dat.impute$date))
 dat.graph <- dat.impute %>% group_by(interval,wknd) %>% summarize(steps=sum(steps,na.rm=T))
 xyplot(steps~interval | factor(wknd),dat.graph,type="l",)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
